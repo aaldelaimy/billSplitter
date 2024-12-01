@@ -1,31 +1,24 @@
+import os
+import re
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 from PIL import Image
-import re
-
-import os
-import shutil
 import pytesseract
 
-def find_tesseract():
-    possible_paths = [
-        "/usr/bin/tesseract",  # Render
-        "/opt/homebrew/bin/tesseract",  # macOS
-        "/usr/local/bin/tesseract",
-        shutil.which("tesseract")
-    ]
-    
-    for path in possible_paths:
-        if path and os.path.exists(path):
-            return path
-    
-    raise FileNotFoundError("Tesseract executable not found. Please install Tesseract OCR.")
+# Ensure uploads directory exists
+os.makedirs('./uploads', exist_ok=True)
 
-# Set the Tesseract path
-pytesseract.pytesseract.tesseract_cmd = find_tesseract()
+# Try to set Tesseract path with multiple fallbacks
+try:
+    pytesseract.pytesseract.tesseract_cmd = '/usr/bin/tesseract'
+except Exception:
+    try:
+        pytesseract.pytesseract.tesseract_cmd = shutil.which('tesseract')
+    except Exception:
+        print("Warning: Could not set Tesseract path")
 
 app = Flask(__name__)
-CORS(app) # Allows cross-origin requests (for React to connect)
+CORS(app)
 
 @app.route('/api/split', methods=['POST'])
 def split_bill():
@@ -53,6 +46,6 @@ def split_bill():
         return jsonify({"total": total, "per_person": per_person})
     except Exception as e:
         return jsonify({"error": str(e)}), 400
-    
-    if __name__ == '__main__':
-        app.run(debug=True)
+
+if __name__ == '__main__':
+    app.run(host='0.0.0.0', port=8000)
