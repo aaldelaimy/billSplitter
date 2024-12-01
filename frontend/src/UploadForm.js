@@ -17,7 +17,7 @@ const UploadForm = () => {
         formData.append("num_people", numPeople);
 
         try{
-            const response = await axios.post("https://billsplitter-y08c.onrender.com", formData);
+            const response = await axios.post("https://billsplitter-y08c.onrender.com/api/split", formData);
             setResult(`Total: $${response.data.total}, Each person pays: $${response.data.per_person}`);
         } catch (error) {
             setResult("Error: " + error.response?.data?.error || "Something went wrong!");
