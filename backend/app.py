@@ -4,11 +4,25 @@ from PIL import Image
 import re
 
 import os
+import shutil
 import pytesseract
-if os.getenv("RENDER"):
-    pytesseract.pytesseract.tesseract_cmd = "/usr/bin/tesseract"  # Path for Render
-else:
-    pytesseract.pytesseract.tesseract_cmd = "/opt/homebrew/bin/tesseract"  # Path for macOS
+
+def find_tesseract():
+    possible_paths = [
+        "/usr/bin/tesseract",  # Render
+        "/opt/homebrew/bin/tesseract",  # macOS
+        "/usr/local/bin/tesseract",
+        shutil.which("tesseract")
+    ]
+    
+    for path in possible_paths:
+        if path and os.path.exists(path):
+            return path
+    
+    raise FileNotFoundError("Tesseract executable not found. Please install Tesseract OCR.")
+
+# Set the Tesseract path
+pytesseract.pytesseract.tesseract_cmd = find_tesseract()
 
 app = Flask(__name__)
 CORS(app) # Allows cross-origin requests (for React to connect)
