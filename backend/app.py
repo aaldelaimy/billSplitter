@@ -1,9 +1,14 @@
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 from PIL import Image
-import pytesseract
-pytesseract.pytesseract.tesseract_cmd = '/opt/homebrew/bin/tesseract'
 import re
+
+import os
+import pytesseract
+if os.getenv("RENDER"):
+    pytesseract.pytesseract.tesseract_cmd = "/usr/bin/tesseract"  # Path for Render
+else:
+    pytesseract.pytesseract.tesseract_cmd = "/opt/homebrew/bin/tesseract"  # Path for macOS
 
 app = Flask(__name__)
 CORS(app) # Allows cross-origin requests (for React to connect)
